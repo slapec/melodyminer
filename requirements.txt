@@ -1,5 +1,6 @@
 aiodns==1.1.1
 aiohttp==3.5.0
-cchardet==2.1.4
 asyncpg==0.18.2
+cchardet==2.1.4
 gino==0.8.1
+sqlalchemy==1.2.15

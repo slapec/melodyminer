@@ -1,10 +1,15 @@
 # coding: utf-8
 
-import melodyminer.marker.views
-import melodyminer.media.views
 from aiohttp import web
 
-app = web.Application()
+import melodyminer.marker.views
+import melodyminer.media.views
+from melodyminer import db
+
+app = web.Application(middlewares=(
+    db,
+))
+
 app.add_routes([
     *melodyminer.media.views.routes,
     *melodyminer.marker.views.routes
