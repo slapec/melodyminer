@@ -1,0 +1,5 @@
+aiodns==1.1.1
+aiohttp==3.5.0
+cchardet==2.1.4
+asyncpg==0.18.2
+gino==0.8.1
