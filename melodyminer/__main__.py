@@ -4,8 +4,11 @@ import argparse
 import asyncio
 import logging
 import sys
+from pathlib import Path
 
-from melodyminer import __version__, commands
+import melodyminer.media.commands
+from melodyminer import __version__, commands, db
+from melodyminer.conf import settings
 
 log = logging.getLogger('melodyminer')
 
@@ -48,17 +51,27 @@ parser_start = subparsers.add_parser(
 )
 parser_start.set_defaults(func=commands.start)
 
-parser_start.add_argument(
-    '-H', '--host',
-    help='Server IP to listen on (default: %(default)s)',
-    default='0.0.0.0'
+# media ------------------------------------------------------------------------
+parser_media = subparsers.add_parser(
+    'media',
+    help='CLI tools for media management',
+    description='CLI tools for media management'
 )
+parser_media.set_defaults(func=lambda x: parser_media.print_help())
 
-parser_start.add_argument(
-    '-P', '--port',
-    help='Server port to listen on (default: %(default)s)',
-    type=int,
-    default=9001
+media_subparsers = parser_media.add_subparsers()
+
+parser_media_import = media_subparsers.add_parser(
+    'import',
+    help='Import an audio file into the storage'
+)
+parser_media_import.set_defaults(func=melodyminer.media.commands.import_)
+
+parser_media_import.add_argument(
+    'paths',
+    help='File path or paths',
+    type=Path,
+    nargs='+'
 )
 
 
@@ -73,14 +86,24 @@ def main():
     log.setLevel(log_level)
     log.addHandler(stdout_handler)
 
-    func = args.func
+    func = getattr(args, 'func', None)
 
     if asyncio.iscoroutinefunction(func):
         log.debug('Executing %s in the event loop', func)
-        return asyncio.run(func(args), debug=log_level == logging.DEBUG)
-    else:
-        log.debug('Executing %s', func)
+
+        async def wrapper():
+            log.debug('Connecting to the database')
+            await db.set_bind(settings.DATABASE_DSN)
+
+            return await func(args)
+
+        return asyncio.run(wrapper(), debug=log_level == logging.DEBUG)
+
+    elif callable(func):
         return func(args)
+
+    else:
+        raise NotImplementedError(func)
 
 
 if __name__ == '__main__':

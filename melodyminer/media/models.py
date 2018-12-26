@@ -1,18 +1,23 @@
 # coding: utf-8
 
 from datetime import datetime
+from typing import TYPE_CHECKING, Optional
 
 import sqlalchemy as sa
 
 from melodyminer import db
+
+if TYPE_CHECKING:
+    from melodyminer.marker.models import Progress
 
 
 class Audio(db.Model):
     __tablename__ = 'media_audio'
 
     id = sa.Column(
-        sa.Integer,
-        primary_key=True
+        sa.String(32),
+        primary_key=True,
+        autoincrement=False
     )
 
     path = sa.Column(
@@ -30,3 +35,13 @@ class Audio(db.Model):
         nullable=False,
         default=datetime.now
     )
+
+    _progress: Optional['Progress'] = None
+
+    @property
+    def progress(self) -> Optional['Progress']:
+        return self._progress
+
+    @progress.setter
+    def progress(self, value: 'Progress'):
+        self._progress = value

@@ -5,14 +5,12 @@ import logging
 from aiohttp import web
 
 from melodyminer import db, app
+from melodyminer.conf import settings
 
 log = logging.getLogger(__name__)
 
 
 async def setup(args):
-    log.info('Connecting to the database')
-    await db.set_bind('asyncpg://melodyminer:melodyminer@127.0.0.1:5432/melodyminer')
-
     log.info('Creating database scheme')
     await db.gino.create_all()
 
@@ -22,7 +20,7 @@ async def setup(args):
 def start(args):
     app['config'] = {
         'gino': {
-            'dsn': 'asyncpg://melodyminer:melodyminer@127.0.0.1:5432/melodyminer'
+            'dsn': settings.DATABASE_DSN
         }
     }
 
@@ -30,6 +28,6 @@ def start(args):
 
     return web.run_app(
         app=app,
-        host=args.host,
-        port=args.port
+        host=settings.WEB_HOST,
+        port=settings.WEB_PORT
     )
