@@ -1,3 +1,6 @@
 module.exports = {
-  outputDir: 'www'
+  outputDir: 'www',
+  devServer: {
+    proxy: 'http://localhost:9001'
+  }
 };

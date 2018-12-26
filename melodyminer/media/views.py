@@ -33,4 +33,4 @@ async def audio_list(request: web.Request):
 async def audio_stream(request: web.Request):
     audio: Audio = await Audio.get_or_404(request.match_info.get('id'))
 
-    return web.FileResponse(audio.path)
+    return web.FileResponse(audio.absolute_path)

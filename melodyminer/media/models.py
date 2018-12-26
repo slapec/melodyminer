@@ -1,11 +1,13 @@
 # coding: utf-8
 
 from datetime import datetime
+from pathlib import Path
 from typing import TYPE_CHECKING, Optional
 
 import sqlalchemy as sa
 
 from melodyminer import db
+from melodyminer.conf import settings
 
 if TYPE_CHECKING:
     from melodyminer.marker.models import Progress
@@ -45,3 +47,7 @@ class Audio(db.Model):
     @progress.setter
     def progress(self, value: 'Progress'):
         self._progress = value
+
+    @property
+    def absolute_path(self) -> Path:
+        return settings.MEDIA_DIR / self.path

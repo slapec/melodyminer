@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING, List
 
 from tqdm import tqdm
 
+from melodyminer.conf import settings
 from melodyminer.media.models import Audio
 
 if TYPE_CHECKING:
@@ -21,6 +22,7 @@ log = logging.getLogger(__name__)
 async def import_(args: 'Namespace') -> int:
     paths: List[Path] = args.paths
 
+    log.info('Media directory: %s', settings.MEDIA_DIR)
     log.info('%s files will be imported', len(paths))
     has_conflict = False
     has_exception = False
@@ -47,8 +49,7 @@ async def import_(args: 'Namespace') -> int:
 
             audio = await Audio.get(file_hash)
             if not audio:
-                media_dir = Path(__file__).parent.parent.parent / 'media'
-                audio_dir = media_dir / file_hash[:2] / file_hash[2:4]
+                audio_dir = settings.MEDIA_DIR / file_hash[:2] / file_hash[2:4]
                 audio_path = audio_dir / path.name
 
                 log.info('Audio file will be copied into %s', audio_path)
@@ -65,7 +66,7 @@ async def import_(args: 'Namespace') -> int:
                 audio = await Audio.create(
                     id=file_hash,
                     title=path.name,
-                    path=str(audio_path)
+                    path=str(audio_path.relative_to(settings.MEDIA_DIR))
                 )
 
                 log.info('Audio #%s has been created. Title: %s', audio.id, audio.title)
